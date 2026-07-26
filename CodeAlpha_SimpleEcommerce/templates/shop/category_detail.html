@@ -1,0 +1,2 @@
+{% extends "base.html" %}
+{% block content %}<nav class="breadcrumbs"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'categories' %}">Categories</a> / {{ category.name }}</nav><h1>{{ category.name }}</h1><p>{{ category.description }}</p><div class="grid">{% for product in products %}{% include "shop/_product_card.html" %}{% empty %}<p>No products in this category.</p>{% endfor %}</div>{% endblock %}

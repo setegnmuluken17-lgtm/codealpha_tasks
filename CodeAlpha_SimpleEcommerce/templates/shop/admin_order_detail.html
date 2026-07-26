@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} | Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="admin-order-detail">
+  <div class="admin-breadcrumb">
+    <a href="{% url 'admin_stats' %}">Dashboard</a>
+    <span>/</span>
+    <a href="{% url 'admin:shop_order_changelist' %}">Orders</a>
+    <span>/</span>
+    <span>#{{ order.id }}</span>
+  </div>
+
+  <div class="dashboard-heading">
+    <div>
+      <p class="eyebrow">Order Management</p>
+      <h1 class="section-title">Order #{{ order.id }}</h1>
+    </div>
+    <span class="status-pill {{ order.status }}">{{ order.get_status_display }}</span>
+  </div>
+
+  <div class="order-detail-grid">
+    <article class="panel">
+      <h2>Customer Information</h2>
+      <div class="detail-list">
+        <p><strong>Full Name</strong><span>{{ order.full_name }}</span></p>
+        <p><strong>Phone Number</strong><span>{{ order.phone }}</span></p>
+        <p><strong>Email</strong><span>{{ order.email }}</span></p>
+        <p><strong>Shipping Address</strong><span>{{ order.address }}, {{ order.city }}, {{ order.country }}</span></p>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Payment Information</h2>
+      <div class="detail-list">
+        <p><strong>Payment Method</strong><span>{{ order.get_payment_method_display }}</span></p>
+        <p><strong>Order Date</strong><span>{{ order.created_at|date:"M d, Y H:i" }}</span></p>
+        <p><strong>Order Status</strong><span>{{ order.get_status_display }}</span></p>
+      </div>
+    </article>
+  </div>
+
+  <article class="panel">
+    <div class="panel-heading">
+      <h2>Ordered Products</h2>
+      <a href="{% url 'admin:shop_order_change' order.id %}">Edit in Django Admin</a>
+    </div>
+    <div class="responsive-table">
+      <table class="admin-table">
+        <thead><tr><th>Product Image</th><th>Product Name</th><th>Quantity</th><th>Unit Price</th><th>Total Price</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for item in order.items.all %}
+            <tr>
+              <td><img class="table-product-img" src="{{ item.product.image_url }}" alt="{{ item.product_name }}"></td>
+              <td>{{ item.product_name }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>${{ item.price }}</td>
+              <td>${{ item.subtotal }}</td>
+              <td>
+                <form class="inline-status-form" action="{% url 'admin_order_item_status' item.id %}" method="post">
+                  {% csrf_token %}
+                  <select name="status" onchange="this.form.submit()">
+                    {% for value, label in item.STATUS_CHOICES %}
+                      <option value="{{ value }}" {% if item.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <span class="status-pill {{ item.status }}">{{ item.get_status_display }}</span>
+                </form>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">No products found for this order.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <div class="order-detail-grid">
+    <article class="panel">
+      <h2>Order Summary</h2>
+      <div class="detail-list">
+        <p><strong>Subtotal</strong><span>${{ subtotal }}</span></p>
+        <p><strong>Shipping Fee</strong><span>${{ shipping_fee }}</span></p>
+        <p><strong>Total Amount</strong><span>${{ order.total }}</span></p>
+      </div>
+    </article>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero-slider">
+  <div class="hero-slide active">
+    <p class="eyebrow">Mega Deals Week</p>
+    <h1><span>Save more</span> on products you actually love.</h1>
+    <p>Discover discounts, ratings, wishlists, and smooth checkout across 12 curated departments.</p>
+    <div class="hero-actions"><a class="btn" href="{% url 'product_list' %}">Shop Now</a><a class="btn secondary" href="{% url 'categories' %}">Explore Categories</a></div>
+  </div>
+</section>
+
+<section class="promo-strip">
+  <article>Flash discounts up to 35%</article>
+  <article>Cash on Delivery available</article>
+  <article>120+ products seeded</article>
+</section>
+
+<section>
+  <h2 class="section-title">Featured Categories</h2>
+  <div class="category-grid">
+    {% for category in categories %}
+      <a class="category-card image-card" href="{% url 'category_detail' category.slug %}" style="--bg:url('{{ category.image_url }}')">
+        <span class="cat-icon">{{ category.icon|default:"*" }}</span>
+        <h3>{{ category.name }}</h3>
+        <p>{{ category.products.count }} products</p>
+        <small>{{ category.description }}</small>
+        <strong>Explore Category</strong>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">Featured Products</h2>
+  <div class="grid">{% for product in featured %}{% include "shop/_product_card.html" %}{% endfor %}</div>
+</section>
+
+<section class="flash-sale">
+  <div>
+    <p class="eyebrow">Limited Time</p>
+    <h2>Flash Sale</h2>
+    <p>Discount products with a live countdown timer.</p>
+  </div>
+  <div class="countdown" data-countdown><span>00</span><span>00</span><span>00</span><span>00</span></div>
+</section>
+<section><div class="grid">{% for product in offers %}{% include "shop/_product_card.html" %}{% endfor %}</div></section>
+
+<section>
+  <h2 class="section-title">Trending Products</h2>
+  <div class="grid">{% for product in trending %}{% include "shop/_product_card.html" %}{% endfor %}</div>
+</section>
+<section>
+  <h2 class="section-title">Best Sellers</h2>
+  <div class="grid">{% for product in best_sellers %}{% include "shop/_product_card.html" %}{% endfor %}</div>
+</section>
+<section>
+  <h2 class="section-title">New Arrivals</h2>
+  <div class="grid">{% for product in new_arrivals %}{% include "shop/_product_card.html" %}{% endfor %}</div>
+</section>
+{% if recently_viewed %}<section><h2 class="section-title">Recently Viewed</h2><div class="grid">{% for product in recently_viewed %}{% include "shop/_product_card.html" %}{% endfor %}</div></section>{% endif %}
+
+<section>
+  <h2 class="section-title">Why Choose Us</h2>
+  <div class="feature-grid">
+    <article><span>Ship</span><h3>Free Shipping</h3><p>Simple delivery experience on selected orders.</p></article>
+    <article><span>Lock</span><h3>Secure Payment</h3><p>Cash on Delivery keeps this project simple and safe.</p></article>
+    <article><span>Star</span><h3>Premium Quality</h3><p>Well-presented catalog with ratings and reviews.</p></article>
+    <article><span>Return</span><h3>Easy Returns</h3><p>Customer-service ready pages for store policies.</p></article>
+  </div>
+</section>
+
+<section class="testimonials">
+  <h2 class="section-title">Customer Testimonials</h2>
+  <div class="testimonial-track" data-testimonials>
+    <article class="active"><p>"Clean design and fast shopping flow."</p><strong>Sarah M.</strong></article>
+    <article><p>"The wishlist and category pages make browsing easy."</p><strong>Daniel K.</strong></article>
+    <article><p>"A strong e-commerce project foundation."</p><strong>Amina T.</strong></article>
+  </div>
+</section>
+
+<section class="newsletter"><h2>Newsletter Subscription</h2><p>Get new arrivals, flash sales, and curated product picks.</p><form><input type="email" placeholder="Email address"><button class="btn">Subscribe</button></form></section>
+{% endblock %}

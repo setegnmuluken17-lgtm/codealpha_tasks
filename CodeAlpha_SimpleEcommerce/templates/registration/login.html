@@ -1,0 +1,2 @@
+{% extends "base.html" %}
+{% block content %}<h1>Login</h1><form method="post" class="panel auth">{% csrf_token %}{{ form.as_p }}<button class="btn">Login</button><a href="{% url 'password_reset' %}">Forgot Password?</a></form>{% endblock %}

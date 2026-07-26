@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Post - SocialHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">Edit Post</h2>
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">Content</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.content.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">Image</label>
+                            {% if post.image %}
+                                <div class="mb-2">
+                                    <img src="{{ post.image.url }}" alt="Post image" style="max-width: 200px; border-radius: 10px;">
+                                </div>
+                            {% endif %}
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.image.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.video.id_for_label }}" class="form-label">Video</label>
+                            {% if post.video %}
+                                <div class="mb-2">
+                                    <video controls style="max-width: 200px; border-radius: 10px;">
+                                        <source src="{{ post.video.url }}" type="video/mp4">
+                                    </video>
+                                </div>
+                                <div class="form-check mb-2">
+                                    {{ form.remove_video }}
+                                    <label class="form-check-label" for="{{ form.remove_video.id_for_label }}">
+                                        Remove current video
+                                    </label>
+                                </div>
+                            {% endif %}
+                            {{ form.video }}
+                            <div class="form-text">Upload a new video to replace the current one. Allowed formats: MP4, WebM, MOV. Max size: 50 MB.</div>
+                            {% if form.video.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.video.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'post_detail' post.id %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

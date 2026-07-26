@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="contact-hero">
+  <div>
+    <p class="eyebrow">Contact Us</p>
+    <h1>Reach CodeAlpha Shop</h1>
+    <p>Send a message, browse our Bahir Dar address on Google Maps, or connect through LinkedIn and GitHub.</p>
+  </div>
+</section>
+
+<section class="split">
+  <form method="post" class="panel contact-form">
+    {% csrf_token %}
+    <h2>Contact Form</h2>
+    {{ form.as_p }}
+    <button class="btn">Send Message</button>
+  </form>
+
+  <aside class="panel contact-info">
+    <h2>Contact Information</h2>
+    <div class="contact-list">
+      <p>
+        <span class="contact-icon"><i class="fa-solid fa-phone"></i></span>
+        <span><strong>Phone</strong><a href="tel:+251975632379">+251975632379</a></span>
+      </p>
+      <p>
+        <span class="contact-icon"><i class="fa-solid fa-envelope"></i></span>
+        <span><strong>Email</strong><a href="mailto:setegnmuluken17@gmail.com">setegnmuluken17@gmail.com</a></span>
+      </p>
+      <p>
+        <span class="contact-icon"><i class="fa-solid fa-location-dot"></i></span>
+        <span><strong>Address</strong><a href="https://maps.google.com/?q=Bahir+Dar+Ethiopia" target="_blank" rel="noreferrer">Bahir Dar, Ethiopia</a></span>
+      </p>
+      <p>
+        <span class="contact-icon"><i class="fa-brands fa-linkedin"></i></span>
+        <span><strong>LinkedIn</strong><a href="https://www.linkedin.com/in/muluken-setegn-2127ma" target="_blank" rel="noreferrer">LinkedIn</a></span>
+      </p>
+      <p>
+        <span class="contact-icon"><i class="fa-brands fa-github"></i></span>
+        <span><strong>GitHub</strong><a href="https://github.com/setegnmuluken17-lgtm" target="_blank" rel="noreferrer">GitHub</a></span>
+      </p>
+    </div>
+
+    <h3>Business Hours</h3>
+    <p>Monday - Friday: 8:00 AM - 6:00 PM</p>
+    <p>Saturday: 9:00 AM - 2:00 PM</p>
+  </aside>
+</section>
+
+<section class="panel map-panel">
+  <div>
+    <h2>Browse Our Address</h2>
+    <p>Bahir Dar, Ethiopia</p>
+    <a class="btn" href="https://maps.google.com/?q=Bahir+Dar+Ethiopia" target="_blank" rel="noopener">Open in Google Maps</a>
+  </div>
+  <iframe
+    class="google-map"
+    title="Bahir Dar Ethiopia Google Map"
+    loading="lazy"
+    referrerpolicy="no-referrer-when-downgrade"
+    src="https://www.google.com/maps?q=Bahir%20Dar%2C%20Ethiopia&output=embed">
+  </iframe>
+</section>
+{% endblock %}

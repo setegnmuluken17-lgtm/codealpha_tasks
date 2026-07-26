@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }} - SocialHub{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="container">
+        {% if profile.cover_photo %}
+            <img src="{{ profile.cover_photo.url }}" alt="Cover" class="cover-photo rounded">
+        {% else %}
+            <div class="cover-photo rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if request.user == user %}
+                        <a href="{% url 'create_story' %}" class="d-inline-block text-decoration-none js-add-story" title="Add story">
+                            {% if profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}" alt="{{ user.username }}" class="profile-pic mb-2">
+                            {% else %}
+                                <div class="profile-pic mb-2 bg-secondary d-inline-flex align-items-center justify-content-center" style="font-size: 60px; color: white;">
+                                    👤
+                                </div>
+                            {% endif %}
+                        </a>
+                    {% else %}
+                        {% if profile.profile_picture %}
+                            <img src="{{ profile.profile_picture.url }}" alt="{{ user.username }}" class="profile-pic mb-3">
+                        {% else %}
+                            <div class="profile-pic mb-3 bg-secondary d-inline-flex align-items-center justify-content-center" style="font-size: 60px; color: white;">
+                                👤
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <h3 class="card-title">{{ user.get_full_name|default:user.username }}</h3>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    
+                    {% if profile.bio %}
+                        <p class="card-text"><strong>Bio:</strong> {{ profile.bio }}</p>
+                    {% else %}
+                        <p class="card-text text-muted"><strong>Bio:</strong> No bio added yet.</p>
+                    {% endif %}
+
+                    {% if profile.birth_date %}
+                        <p class="text-muted">Birthday: {{ profile.birth_date|date:"F j, Y" }}</p>
+                    {% endif %}
+                    
+                    {% if profile.location %}
+                        <p class="text-muted">📍 {{ profile.location }}</p>
+                    {% endif %}
+                    
+                    {% if profile.website %}
+                        <p><a href="{{ profile.website }}" target="_blank">🔗 {{ profile.website }}</a></p>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <strong>{{ posts.count }}</strong>
+                                <p class="text-muted">Posts</p>
+                            </div>
+                            <div class="col-6">
+                                <a href="{% url 'followers_list' user.username %}" class="text-decoration-none text-dark">
+                                    <strong>{{ followers_count }}</strong>
+                                    <p class="text-muted">Followers</p>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <a href="{% url 'following_list' user.username %}" class="text-decoration-none text-dark">
+                                    <strong>{{ following_count }}</strong>
+                                    <p class="text-muted">Following</p>
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <strong>{{ profile.joined_date|date:"Y" }}</strong>
+                                <p class="text-muted">Joined</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if request.user == user %}
+                        <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-follow w-100 mt-3">Edit Profile</a>
+                    {% elif request.user.is_authenticated %}
+                        {% if can_message %}
+                            <a href="{% url 'chat_thread' user.username %}" class="btn btn-success btn-follow w-100 mt-3">Message</a>
+                        {% endif %}
+                        {% if is_following %}
+                            <a href="{% url 'unfollow_user' user.username %}" class="btn btn-outline-primary btn-follow w-100 mt-3">Unfollow</a>
+                        {% else %}
+                            <a href="{% url 'follow_user' user.username %}" class="btn btn-primary btn-follow w-100 mt-3">Follow</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            {% if stories %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Stories</h5>
+                        <div class="d-flex gap-3 overflow-auto pb-2">
+                            {% for story in stories %}
+                                <a href="{% url 'story_detail' story.id %}" class="text-decoration-none text-center text-dark">
+                                    {% if story.image %}
+                                        <img src="{{ story.image.url }}" alt="Story image" style="width: 96px; height: 120px; border-radius: 8px; object-fit: cover;">
+                                    {% elif story.video %}
+                                        <div style="width: 96px; height: 120px; border-radius: 8px; background: #212529; color: white; display: flex; align-items: center; justify-content: center;">Video</div>
+                                    {% else %}
+                                        <div style="width: 96px; height: 120px; border-radius: 8px; background: #e9ecef; display: flex; align-items: center; justify-content: center; padding: 8px;">{{ story.caption|truncatechars:30 }}</div>
+                                    {% endif %}
+                                    <small class="d-block mt-1">Expires {{ story.expires_at|timeuntil }}</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <h4 class="mb-4">Posts</h4>
+            
+            {% if posts %}
+                {% for post in posts %}
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center">
+                                    {% if post.author.profile.profile_picture %}
+                                        <img src="{{ post.author.profile.profile_picture.url }}" alt="{{ post.author.username }}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+                                    {% else %}
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #ccc; margin-right: 10px; display: flex; align-items: center; justify-content: center;">👤</div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="mb-0"><a href="{% url 'profile' post.author.username %}" class="text-decoration-none">{{ post.author.get_full_name|default:post.author.username }}</a></h6>
+                                        <small class="text-muted">@{{ post.author.username }} • {{ post.created_at|timesince }} ago</small>
+                                    </div>
+                                </div>
+                                {% if request.user == post.author %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown">
+                                            ⋮
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{% url 'edit_post' post.id %}">Edit</a></li>
+                                            <li><a class="dropdown-item text-danger" href="{% url 'delete_post' post.id %}">Delete</a></li>
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <a href="{% url 'post_detail' post.id %}" class="text-decoration-none text-dark">
+                                <p class="card-text">{{ post.content }}</p>
+                                
+                                {% if post.image %}
+                                    <img src="{{ post.image.url }}" alt="Post image" style="max-width: 100%; border-radius: 10px; margin: 10px 0;">
+                                {% endif %}
+                            </a>
+
+                            {% if post.video %}
+                                <div class="mt-3">
+                                    <video controls class="img-fluid rounded" style="max-height: 400px; width: 100%;">
+                                        <source src="{{ post.video.url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <div class="mt-2">
+                                        <a href="{% url 'post_detail' post.id %}" class="btn btn-light btn-sm">Open Video Post</a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mt-3 pt-3 border-top">
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <small class="text-muted me-auto">
+                                        ❤️ {{ post.like_count }} Likes • 💬 {{ post.comment_count }} Comments
+                                    </small>
+                                    <a href="{% url 'post_detail' post.id %}" class="btn btn-light btn-sm">View Post</a>
+                                    {% if request.user == post.author %}
+                                        <a href="{% url 'edit_post' post.id %}" class="btn btn-light btn-sm">Edit</a>
+                                        <a href="{% url 'delete_post' post.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info text-center">
+                    No posts yet. {% if request.user == user %}Start sharing!{% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.js-add-story').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            if (!confirm('Add story?')) {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

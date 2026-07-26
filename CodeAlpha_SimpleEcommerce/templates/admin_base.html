@@ -1,0 +1,53 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Admin Dashboard{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="admin-body">
+  <aside class="admin-sidebar">
+    <a class="admin-brand" href="{% url 'admin_stats' %}"><span>CA</span> Admin</a>
+    <nav class="admin-nav">
+      <a class="active" href="{% url 'admin_stats' %}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="{% url 'admin:auth_user_changelist' %}"><i class="fa-solid fa-users"></i> Users</a>
+      <a href="{% url 'admin:shop_category_changelist' %}"><i class="fa-solid fa-layer-group"></i> Categories</a>
+      <a href="{% url 'admin:shop_product_changelist' %}"><i class="fa-solid fa-boxes-stacked"></i> Products</a>
+      <a href="{% url 'admin:shop_order_changelist' %}"><i class="fa-solid fa-receipt"></i> Orders</a>
+      <a href="{% url 'admin:shop_productreview_changelist' %}"><i class="fa-solid fa-star"></i> Reviews</a>
+      <a href="{% url 'admin:shop_contactmessage_changelist' %}"><i class="fa-solid fa-envelope"></i> Messages</a>
+      <a href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i> Django Admin</a>
+    </nav>
+  </aside>
+
+  <div class="admin-shell">
+    <header class="admin-topbar">
+      <div>
+        <p class="admin-kicker">Management</p>
+        <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+      </div>
+      <div class="admin-actions">
+        <a class="admin-bell" href="{% url 'admin:shop_contactmessage_changelist' %}" title="Contact messages">
+          <i class="fa-solid fa-bell"></i>
+          <span>{{ stats.messages|default:0 }}</span>
+        </a>
+        <a class="admin-bell orders" href="{% url 'admin:shop_order_changelist' %}?status__exact=pending" title="Pending orders">
+          <i class="fa-solid fa-truck-fast"></i>
+          <span>{{ stats.pending_orders|default:0 }}</span>
+        </a>
+        <a class="btn" href="{% url 'admin:logout' %}">Logout</a>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

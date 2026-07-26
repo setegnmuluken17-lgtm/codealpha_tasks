@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Post - SocialHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-body p-5">
+                    <h2 class="card-title text-danger mb-4">Delete Post?</h2>
+                    
+                    <p class="text-muted mb-4">
+                        Are you sure you want to delete this post? This action cannot be undone.
+                    </p>
+
+                    <div class="alert alert-light">
+                        <p class="mb-0">{{ post.content|truncatewords:30 }}</p>
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" alt="Post image" style="max-width: 100%; margin-top: 10px; border-radius: 5px;">
+                        {% endif %}
+                        {% if post.video %}
+                            <video controls style="max-width: 100%; margin-top: 10px; border-radius: 5px;">
+                                <source src="{{ post.video.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" class="d-flex gap-2 justify-content-center">
+                        {% csrf_token %}
+                        <a href="{% url 'post_detail' post.id %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger">Delete Post</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

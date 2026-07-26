@@ -1,0 +1,161 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}E-Commerce Shop{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <script defer src="{% static 'js/main.js' %}"></script>
+</head>
+<body class="{% if request.resolver_match.url_name == 'admin_stats' or request.resolver_match.url_name == 'admin_order_detail' or request.resolver_match.url_name == 'admin_order_status' %}admin-page{% endif %}">
+  <div class="loader" data-loader></div>
+  <header class="site-header">
+    <a class="logo" href="{% url 'home' %}"><span class="logo-mark">🛍️</span><span>E-Commerce Shop</span></a>
+    <button class="menu-toggle" type="button" data-menu-toggle>☰</button>
+    <nav class="nav" data-nav>
+      <div class="nav-left">
+        {% if request.resolver_match.url_name == 'admin_stats' or request.resolver_match.url_name == 'admin_order_detail' or request.resolver_match.url_name == 'admin_order_status' %}
+        {% else %}
+          <a class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+          <a class="{% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'product_list' %}">Shop</a>
+          <a class="{% if request.resolver_match.url_name == 'categories' %}active{% endif %}" href="{% url 'categories' %}">Categories</a>
+          <a class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}" href="{% url 'contact' %}">Contact</a>
+        {% endif %}
+      </div>
+      <div class="nav-right">
+        <div class="search-box">
+          <button type="button" aria-label="Search">🔍</button>
+          <input type="search" placeholder="Search products..." data-search-input data-suggestions-url="{% url 'search_suggestions' %}">
+          <div class="suggestions" data-suggestions></div>
+        </div>
+        {% if user.is_authenticated %}
+          {% if request.resolver_match.url_name == 'admin_stats' or request.resolver_match.url_name == 'admin_order_detail' or request.resolver_match.url_name == 'admin_order_status' %}
+            <details class="admin-notification-menu">
+              <summary class="icon-link admin-nav-bell" title="Admin notifications">
+                <i class="fa-solid fa-bell"></i>
+                <span>{{ admin_notification_count }}</span>
+              </summary>
+              <div class="admin-notification-dropdown">
+                <h3>New Orders</h3>
+                {% for order in admin_new_orders %}
+                  <a href="{% url 'admin_order_detail' order.id %}">
+                    <strong>#{{ order.id }} - {{ order.full_name }}</strong>
+                    <small>${{ order.total }} · {{ order.created_at|date:"M d, H:i" }}</small>
+                  </a>
+                {% empty %}
+                  <p>No new orders.</p>
+                {% endfor %}
+                <a class="view-all" href="{% url 'admin:shop_order_changelist' %}?status__exact=pending">View all pending orders</a>
+                <h3>New Messages</h3>
+                {% for message in admin_new_messages %}
+                  <a href="{% url 'admin:shop_contactmessage_change' message.id %}">
+                    <strong>{{ message.name }} - {{ message.subject }}</strong>
+                    <small>{{ message.email }} · {{ message.created_at|date:"M d, H:i" }}</small>
+                  </a>
+                {% empty %}
+                  <p>No new messages.</p>
+                {% endfor %}
+                <a class="view-all" href="{% url 'admin:shop_contactmessage_changelist' %}?status__exact=new">View all new messages</a>
+              </div>
+            </details>
+            <div class="admin-header-profile">
+              <button class="icon-link admin-nav-profile" type="button" data-profile-toggle title="Admin profile">
+                <i class="fa-solid fa-user-shield"></i>
+              </button>
+              <div class="profile-dropdown" data-profile-dropdown>
+                <a href="{% url 'admin:index' %}"><i class="fa-solid fa-gear menu-icon"></i> Settings</a>
+                <a href="{% url 'password_change' %}"><i class="fa-solid fa-key menu-icon"></i> Change Password</a>
+                <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button><i class="fa-solid fa-right-from-bracket menu-icon"></i> Logout</button></form>
+              </div>
+            </div>
+          {% else %}
+            <a class="icon-link" href="{% url 'wishlist' %}" title="Wishlist">❤️ <span>{{ wishlist_count }}</span></a>
+            <a class="icon-link" href="{% url 'cart_detail' %}" title="Cart">🛒 <span>{{ cart_item_count }}</span></a>
+          {% endif %}
+          {% if request.resolver_match.url_name == 'admin_stats' or request.resolver_match.url_name == 'admin_order_detail' or request.resolver_match.url_name == 'admin_order_status' %}
+          {% else %}
+          <details class="user-notification-menu">
+            <summary class="icon-link user-nav-bell" title="Order notifications">
+              <i class="fa-solid fa-bell"></i>
+              <span>{{ user_notification_count }}</span>
+            </summary>
+            <div class="user-notification-dropdown">
+              <h3>Order Notifications</h3>
+              {% for note in user_notifications %}
+                <a href="{% url 'notification_open' note.id %}">
+                  <i class="fa-solid {{ note.icon }}"></i>
+                  <span>
+                    <strong>{{ note.title }}</strong>
+                    {% if note.message %}<small>{{ note.message }}</small>{% endif %}
+                  </span>
+                </a>
+              {% empty %}
+                <p>No order notifications yet.</p>
+              {% endfor %}
+            </div>
+          </details>
+          <div class="profile-menu">
+            <button type="button" data-profile-toggle>👤</button>
+            <div class="profile-dropdown" data-profile-dropdown>
+              {% if request.resolver_match.url_name == 'admin_stats' or request.resolver_match.url_name == 'admin_order_detail' or request.resolver_match.url_name == 'admin_order_status' %}
+                {% if user.is_staff %}<a href="{% url 'admin_stats' %}"><i class="fa-solid fa-chart-line menu-icon"></i> Admin Stats</a>{% endif %}
+                <a href="{% url 'admin:index' %}"><i class="fa-solid fa-gear menu-icon"></i> Settings</a>
+                <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button><i class="fa-solid fa-right-from-bracket menu-icon"></i> Logout</button></form>
+              {% else %}
+                <a href="{% url 'profile' %}"><i class="fa-solid fa-user menu-icon"></i> My Profile</a>
+                <a href="{% url 'order_list' %}"><i class="fa-solid fa-box menu-icon"></i> My Orders</a>
+                <a href="{% url 'wishlist' %}"><i class="fa-solid fa-heart menu-icon"></i> Wishlist</a>
+                <a href="{% url 'edit_profile' %}"><i class="fa-solid fa-gear menu-icon"></i> Settings</a>
+                <form action="{% url 'logout' %}" method="post">{% csrf_token %}<button><i class="fa-solid fa-right-from-bracket menu-icon"></i> Logout</button></form>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}"><i class="fa-solid fa-lock menu-icon"></i> Login</a>
+          <a href="{% url 'register' %}"><i class="fa-solid fa-user-plus menu-icon"></i> Register</a>
+        {% endif %}
+        <details class="bg-picker">
+          <summary title="Choose background"><i class="fa-solid fa-palette"></i></summary>
+          <div class="bg-options">
+            <button type="button" data-bg-choice="default" class="bg-dot default" title="Default"></button>
+            <button type="button" data-bg-choice="blue" class="bg-dot blue" title="Blue"></button>
+            <button type="button" data-bg-choice="green" class="bg-dot green" title="Green"></button>
+            <button type="button" data-bg-choice="rose" class="bg-dot rose" title="Rose"></button>
+            <button type="button" data-bg-choice="warm" class="bg-dot warm" title="Warm"></button>
+          </div>
+        </details>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+      </div>
+    </nav>
+  </header>
+
+  {% if messages %}
+    <section class="messages">{% for message in messages %}<p class="message {{ message.tags }}">{{ message }}</p>{% endfor %}</section>
+  {% endif %}
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <button class="back-to-top" data-back-top type="button">Top</button>
+
+  <footer class="footer">
+    <div><a class="footer-logo" href="{% url 'home' %}"><span class="logo-mark">🛍️</span>CodeAlpha Shop</a><p>A polished Django storefront with categories, reviews, wishlists, smart cart, and responsive shopping pages.</p></div>
+    <div><h3>Quick Links</h3><a href="{% url 'home' %}">Home</a><a href="{% url 'product_list' %}">Shop</a><a href="{% url 'categories' %}">Categories</a><a href="{% url 'contact' %}">Contact</a></div>
+    <div><h3>Customer Service</h3><a href="{% url 'contact' %}">FAQ</a><a href="{% url 'contact' %}">Shipping</a><a href="{% url 'contact' %}">Returns</a><a href="{% url 'contact' %}">Privacy Policy</a></div>
+    <div>
+      <h3>Contact</h3>
+      <p><i class="fa-solid fa-phone footer-contact-icon"></i> <a href="tel:+251975632379">+251975632379</a></p>
+      <p><i class="fa-solid fa-envelope footer-contact-icon"></i> <a href="mailto:setegnmuluken17@gmail.com">setegnmuluken17@gmail.com</a></p>
+      <p><i class="fa-solid fa-location-dot footer-contact-icon"></i> <a href="https://maps.google.com/?q=Bahir+Dar+Ethiopia" target="_blank" rel="noreferrer">Bahir Dar, Ethiopia</a></p>
+      <p><i class="fa-brands fa-linkedin footer-contact-icon"></i> <a href="https://www.linkedin.com/in/muluken-setegn-2127ma" target="_blank" rel="noreferrer">LinkedIn</a></p>
+      <p class="social"><i class="fa-brands fa-github footer-contact-icon"></i> <a href="https://github.com/setegnmuluken17-lgtm" target="_blank" rel="noreferrer">GitHub</a></p>
+    </div>
+    <div class="footer-bottom">Copyright &copy; 2026 E-Commerce Shop. Designed & Developed by Muluken.</div>
+  </footer>
+</body>
+</html>

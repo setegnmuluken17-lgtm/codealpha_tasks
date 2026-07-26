@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Order History</h1>
+<div class="panel">
+  {% for order in orders %}
+    <a class="order-line" href="{% url 'order_detail' order.id %}">
+      <span>Order #{{ order.id }}</span>
+      <span>
+        {% for item in order.items.all|slice:":2" %}
+          <span class="status-pill {{ item.status }}">{{ item.product_name }}: {{ item.get_status_display }}</span>
+        {% empty %}
+          <span class="status-pill {{ order.status }}">{{ order.get_status_display }}</span>
+        {% endfor %}
+      </span>
+      <strong>${{ order.total }}</strong>
+    </a>
+  {% empty %}
+    <p>No orders yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

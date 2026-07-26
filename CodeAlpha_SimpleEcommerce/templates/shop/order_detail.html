@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Order #{{ order.id }}</h1>
+<section class="panel">
+  <p>Status: <strong>{{ order.get_status_display }}</strong></p>
+  <p>{{ order.full_name }} · {{ order.phone }} · {{ order.email }}</p>
+  <p>{{ order.address }}, {{ order.city }}</p>
+  <p>Payment Method: {{ order.get_payment_method_display }}</p>
+
+  <div class="responsive-table">
+    <table class="admin-table compact">
+      <thead>
+        <tr><th>Product</th><th>Quantity</th><th>Total</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for item in order.items.all %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.subtotal }}</td>
+            <td><span class="status-pill {{ item.status }}">{{ item.get_status_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No products found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Total: ${{ order.total }}</h2>
+</section>
+{% endblock %}

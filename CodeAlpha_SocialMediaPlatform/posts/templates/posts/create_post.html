@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Post - SocialHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">Create a Post</h2>
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">What's on your mind?</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.content.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">Add an Image (Optional)</label>
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.image.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.video.id_for_label }}" class="form-label">Add a Video (Optional)</label>
+                            {{ form.video }}
+                            <div class="form-text">Allowed video formats: MP4, WebM, MOV. Max size: 50 MB.</div>
+                            {% if form.video.errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {% for error in form.video.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'feed' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Post</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

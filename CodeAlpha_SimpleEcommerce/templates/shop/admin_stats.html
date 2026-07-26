@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | E-Commerce Shop{% endblock %}
+
+{% block content %}
+<section class="admin-dashboard">
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-sidebar-title">
+      <span><i class="fa-solid fa-chart-pie"></i></span>
+      <strong>Admin</strong>
+    </div>
+    <a class="active" href="{% url 'admin_stats' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+    <a href="{% url 'admin:shop_order_changelist' %}"><i class="fa-solid fa-box"></i> Orders</a>
+    <a href="{% url 'admin:shop_product_changelist' %}"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+    <a href="{% url 'admin:shop_category_changelist' %}"><i class="fa-solid fa-folder-tree"></i> Categories</a>
+    <a href="{% url 'admin:auth_user_changelist' %}"><i class="fa-solid fa-users"></i> Users</a>
+    <a href="{% url 'admin:shop_productreview_changelist' %}"><i class="fa-solid fa-star"></i> Reviews</a>
+    <a href="{% url 'admin:shop_contactmessage_changelist' %}"><i class="fa-solid fa-envelope-open-text"></i> Contact Messages</a>
+  </aside>
+
+  <div class="dashboard-content">
+    <div class="dashboard-topbar panel">
+      <form class="dashboard-search" method="get" action="{% url 'admin_stats' %}">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" name="admin_q" value="{{ admin_query }}" placeholder="Search orders, products, users">
+      </form>
+    </div>
+
+    <div class="admin-breadcrumb">
+      <a href="{% url 'admin_stats' %}">Dashboard</a>
+      <span>/</span>
+      <span>Overview</span>
+    </div>
+
+    <div class="dashboard-heading">
+      <div>
+        <h1 class="section-title">Admin Dashboard</h1>
+      </div>
+      <a class="btn secondary" href="{% url 'admin:index' %}"><i class="fa-solid fa-screwdriver-wrench"></i> Admin page</a>
+    </div>
+
+    {% if search_results %}
+      <section class="panel dashboard-search-results">
+        <div class="panel-heading">
+          <h2>Search Results for "{{ admin_query }}"</h2>
+        </div>
+        <div class="search-result-grid">
+          <div>
+            <h3>Orders</h3>
+            {% for order in search_results.orders %}
+              <a href="{% url 'admin_order_detail' order.id %}">#{{ order.id }} - {{ order.full_name }}</a>
+            {% empty %}
+              <p class="muted">No orders found.</p>
+            {% endfor %}
+          </div>
+          <div>
+            <h3>Products</h3>
+            {% for product in search_results.products %}
+              <a href="{% url 'admin:shop_product_change' product.id %}">{{ product.name }}</a>
+            {% empty %}
+              <p class="muted">No products found.</p>
+            {% endfor %}
+          </div>
+          <div>
+            <h3>Users</h3>
+            {% for account in search_results.users %}
+              <a href="{% url 'admin:auth_user_change' account.id %}">{{ account.get_full_name|default:account.username }}</a>
+            {% empty %}
+              <p class="muted">No users found.</p>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="dashboard-stats" id="notifications">
+      <a class="dash-card blue" href="{% url 'admin:auth_user_changelist' %}"><i class="fa-solid fa-users"></i><span>Total Users</span><strong data-counter="{{ stats.users }}">0</strong></a>
+      <a class="dash-card teal" href="{% url 'admin:shop_product_changelist' %}"><i class="fa-solid fa-bag-shopping"></i><span>Total Products</span><strong data-counter="{{ stats.products }}">0</strong></a>
+      <a class="dash-card purple" href="{% url 'admin:shop_category_changelist' %}"><i class="fa-solid fa-folder-tree"></i><span>Total Categories</span><strong data-counter="{{ stats.categories }}">0</strong></a>
+      <a class="dash-card orange" href="{% url 'admin:shop_order_changelist' %}"><i class="fa-solid fa-box"></i><span>Total Orders</span><strong data-counter="{{ stats.orders }}">0</strong></a>
+      <a class="dash-card green" href="{% url 'admin:shop_order_changelist' %}"><i class="fa-solid fa-sack-dollar"></i><span>Total Revenue</span><strong data-counter="{{ stats.revenue }}" data-prefix="$">0</strong></a>
+      <a class="dash-card yellow" href="{% url 'admin:shop_order_changelist' %}?status__exact=pending"><i class="fa-solid fa-circle-exclamation"></i><span>Pending Orders</span><strong data-counter="{{ stats.pending_orders }}">0</strong></a>
+      <a class="dash-card cyan" href="{% url 'admin:shop_order_changelist' %}?status__exact=processing"><i class="fa-solid fa-arrows-rotate"></i><span>Processing Orders</span><strong data-counter="{{ stats.processing_orders }}">0</strong></a>
+      <a class="dash-card indigo" href="{% url 'admin:shop_order_changelist' %}?status__exact=shipped"><i class="fa-solid fa-truck-fast"></i><span>Shipped Orders</span><strong data-counter="{{ stats.shipped_orders }}">0</strong></a>
+      <a class="dash-card emerald" href="{% url 'admin:shop_order_changelist' %}?status__exact=delivered"><i class="fa-solid fa-circle-check"></i><span>Delivered Orders</span><strong data-counter="{{ stats.delivered_orders }}">0</strong></a>
+      <a class="dash-card red" href="{% url 'admin:shop_order_changelist' %}?status__exact=cancelled"><i class="fa-solid fa-circle-xmark"></i><span>Cancelled Orders</span><strong data-counter="{{ stats.cancelled_orders }}">0</strong></a>
+      <a class="dash-card gold" href="{% url 'admin:shop_productreview_changelist' %}"><i class="fa-solid fa-star"></i><span>Total Reviews</span><strong data-counter="{{ stats.reviews }}">0</strong></a>
+      <a class="dash-card slate" href="{% url 'admin:shop_contactmessage_changelist' %}"><i class="fa-solid fa-envelope"></i><span>Contact Messages</span><strong data-counter="{{ stats.messages }}">0</strong></a>
+      <a class="dash-card rose" href="{% url 'admin:shop_product_changelist' %}"><i class="fa-solid fa-triangle-exclamation"></i><span>Low Stock Products</span><strong data-counter="{{ stats.low_stock }}">0</strong></a>
+    </section>
+
+    <section class="dashboard-charts">
+      <article class="panel chart-card"><h2>Monthly Sales</h2><canvas id="monthlySalesChart"></canvas></article>
+      <article class="panel chart-card"><h2>Monthly Revenue</h2><canvas id="monthlyRevenueChart"></canvas></article>
+      <article class="panel chart-card"><h2>Users Registered Per Month</h2><canvas id="usersChart"></canvas></article>
+      <article class="panel chart-card"><h2>Order Status Distribution</h2><canvas id="statusChart"></canvas></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Recent Active Orders</h2>
+        <a href="{% url 'admin:shop_order_changelist' %}">Manage Orders</a>
+      </div>
+      <div class="responsive-table">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Order ID</th><th>Customer Name</th><th>Phone Number</th><th>Email</th><th>Address</th><th>Payment</th><th>Total Price</th><th>Status</th><th>Order Date</th><th>View</th></tr>
+          </thead>
+          <tbody>
+            {% for order in recent_orders %}
+              <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.full_name }}</td>
+                <td>{{ order.phone }}</td>
+                <td>{{ order.email }}</td>
+                <td>{{ order.address }}, {{ order.city }}</td>
+                <td>{{ order.get_payment_method_display }}</td>
+                <td>${{ order.total }}</td>
+                <td><span class="status-pill {{ order.status }}">{{ order.get_status_display }}</span></td>
+                <td>{{ order.created_at|date:"M d, Y H:i" }}</td>
+                <td><a class="small-action" href="{% url 'admin_order_detail' order.id %}">View</a></td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="10">No active orders found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="dashboard-tables">
+      <article class="panel">
+        <h2>Recent Users</h2>
+        <div class="responsive-table">
+          <table class="admin-table compact">
+            <thead><tr><th>Profile</th><th>Full Name</th><th>Email</th><th>Phone Number</th><th>Registration Date</th></tr></thead>
+            <tbody>
+              {% for account in recent_users %}
+                <tr>
+                  <td><span class="profile-avatar">{{ account.username|first|upper }}</span></td>
+                  <td>{{ account.get_full_name|default:account.username }}</td>
+                  <td>{{ account.email|default:"-" }}</td>
+                  <td>{{ account.profile.phone|default:"-" }}</td>
+                  <td>{{ account.date_joined|date:"M d, Y" }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5">No users yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Contact Messages</h2>
+        <div class="responsive-table">
+          <table class="admin-table compact">
+            <thead><tr><th>Customer</th><th>Email</th><th>Subject</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {% for message in contact_messages %}
+                <tr>
+                  <td>{{ message.name }}</td>
+                  <td>{{ message.email }}</td>
+                  <td>{{ message.subject }}</td>
+                  <td>{{ message.created_at|date:"M d, Y" }}</td>
+                  <td><span class="status-pill {{ message.status }}">{{ message.get_status_display }}</span></td>
+                  <td class="table-actions">
+                    <a href="{% url 'admin:shop_contactmessage_change' message.id %}">View</a>
+                    <a href="{% url 'admin_contact_message_action' message.id 'read' %}">Mark Read</a>
+                    <a class="danger-link" href="{% url 'admin_contact_message_action' message.id 'delete' %}">Delete</a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="6">No contact messages yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-tables">
+      <article class="panel">
+        <h2>Recent Reviews</h2>
+        <div class="responsive-table">
+          <table class="admin-table compact">
+            <thead><tr><th>Customer</th><th>Product</th><th>Rating</th><th>Review</th><th>Review Date</th></tr></thead>
+            <tbody>
+              {% for review in recent_reviews %}
+                <tr>
+                  <td>{{ review.user.get_full_name|default:review.user.username }}</td>
+                  <td>{{ review.product.name }}</td>
+                  <td><span class="rating">{{ review.rating }} ★</span></td>
+                  <td>{{ review.comment|truncatechars:70 }}</td>
+                  <td>{{ review.created_at|date:"M d, Y" }}</td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="5">No reviews yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h2>Low Stock Products</h2>
+        <div class="responsive-table">
+          <table class="admin-table compact">
+            <thead><tr><th>Image</th><th>Product Name</th><th>Category</th><th>Stock Quantity</th></tr></thead>
+            <tbody>
+              {% for product in low_stock_products %}
+                <tr>
+                  <td><img class="table-product-img" src="{{ product.image_url }}" alt="{{ product.name }}"></td>
+                  <td>{{ product.name }}</td>
+                  <td>{{ product.category.name|default:"-" }}</td>
+                  <td><strong class="low-stock-number">{{ product.stock }}</strong></td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="4">No low stock products.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </div>
+</section>
+
+{{ chart_data|json_script:"admin-chart-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  (function () {
+    const chartNode = document.getElementById("admin-chart-data");
+    const chartData = chartNode ? JSON.parse(chartNode.textContent) : {};
+    const palette = ["#2563eb", "#16a34a", "#f97316", "#7c3aed", "#06b6d4", "#ef4444"];
+    const makeChart = (id, config) => {
+      const canvas = document.getElementById(id);
+      if (canvas && window.Chart) {
+        new Chart(canvas, config);
+      }
+    };
+    makeChart("monthlySalesChart", {
+      type: "bar",
+      data: { labels: chartData.salesLabels || [], datasets: [{ label: "Orders", data: chartData.salesData || [], backgroundColor: "#2563eb", borderRadius: 10 }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    makeChart("monthlyRevenueChart", {
+      type: "bar",
+      data: { labels: chartData.revenueLabels || [], datasets: [{ label: "Revenue", data: chartData.revenueData || [], backgroundColor: "#16a34a", borderRadius: 10 }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+    makeChart("usersChart", {
+      type: "bar",
+      data: { labels: chartData.userLabels || [], datasets: [{ label: "Users", data: chartData.userData || [], backgroundColor: "#7c3aed", borderRadius: 10 }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+    makeChart("statusChart", {
+      type: "bar",
+      data: { labels: chartData.statusLabels || [], datasets: [{ data: chartData.statusData || [], backgroundColor: palette }] },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    });
+
+    document.querySelectorAll("[data-counter]").forEach((node) => {
+      const target = Number(node.dataset.counter || 0);
+      const prefix = node.dataset.prefix || "";
+      const start = performance.now();
+      const duration = 900;
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const value = target * progress;
+        node.textContent = prefix + (prefix ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : Math.round(value).toLocaleString());
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+
+    const toggle = document.querySelector("[data-admin-profile-toggle]");
+    const menu = document.querySelector("[data-admin-profile-menu]");
+    if (toggle && menu) {
+      toggle.addEventListener("click", () => menu.classList.toggle("open"));
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest("[data-admin-profile]")) menu.classList.remove("open");
+      });
+    }
+
+    if (!new URLSearchParams(window.location.search).has("admin_q")) {
+      window.setInterval(() => {
+        if (document.visibilityState === "visible") {
+          window.location.reload();
+        }
+      }, 45000);
+    }
+  })();
+</script>
+{% endblock %}

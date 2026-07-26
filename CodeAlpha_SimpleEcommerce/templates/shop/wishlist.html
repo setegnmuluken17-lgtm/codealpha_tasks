@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'home' %}">Home</a> / Wishlist</nav>
+<h1 class="section-title">Saved Products</h1>
+<div class="grid">
+  {% for item in items %}
+    <article class="product-card"><img src="{{ item.product.image_url }}" alt="{{ item.product.name }}"><div><h3>{{ item.product.name }}</h3><p>{{ item.product.brand }}</p><p class="rating">★★★★★ <span>{{ item.product.average_rating|floatformat:1 }}</span></p><strong>${{ item.product.final_price|floatformat:2 }}</strong><a class="btn full" href="{% url 'wishlist_move_to_cart' item.product.id %}">Move to Cart</a><form action="{% url 'wishlist_toggle' item.product.id %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{% url 'wishlist' %}"><button class="ghost-btn">Remove</button></form></div></article>
+  {% empty %}<p>No products saved yet.</p>{% endfor %}
+</div>
+{% endblock %}

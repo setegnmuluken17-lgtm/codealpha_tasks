@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages - SocialHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Messages</h2>
+            <a href="{% url 'feed' %}" class="btn btn-light btn-sm">Back to Feed</a>
+        </div>
+
+        {% if conversations %}
+            {% for item in conversations %}
+                <a href="{% url 'chat_thread' item.friend.username %}" class="text-decoration-none text-dark">
+                    <div class="card">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            {% if item.friend.profile.profile_picture %}
+                                <img src="{{ item.friend.profile.profile_picture.url }}" alt="{{ item.friend.username }}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;">
+                            {% else %}
+                                <div style="width: 56px; height: 56px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center;">User</div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>{{ item.friend.get_full_name|default:item.friend.username }}</strong>
+                                    {% if item.unread_count %}
+                                        <span class="badge bg-primary">{{ item.unread_count }}</span>
+                                    {% endif %}
+                                </div>
+                                <small class="text-muted">@{{ item.friend.username }}</small>
+                                {% if item.last_message %}
+                                    <p class="mb-0 mt-1 text-muted">
+                                        {% if item.last_message.sender == request.user %}You: {% endif %}
+                                        {% if item.last_message.text %}
+                                            {{ item.last_message.text|truncatechars:80 }}
+                                        {% elif item.last_message.voice %}
+                                            Voice message
+                                        {% endif %}
+                                    </p>
+                                {% else %}
+                                    <p class="mb-0 mt-1 text-muted">Start a conversation</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info text-center">
+                You do not have messageable friends yet. Follow someone who follows you back to start messaging.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

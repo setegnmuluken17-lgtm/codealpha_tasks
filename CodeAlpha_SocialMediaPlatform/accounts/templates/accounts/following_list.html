@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }}'s Following - SocialHub{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if user.profile.profile_picture %}
+                        <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 15px;">
+                    {% else %}
+                        <div style="width: 120px; height: 120px; border-radius: 50%; background: #ccc; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px;">👤</div>
+                    {% endif %}
+                    
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">@{{ user.username }}</p>
+                    
+                    <a href="{% url 'profile' user.username %}" class="btn btn-primary btn-sm w-100">View Profile</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <h3 class="mb-4">Following ({{ following_count }})</h3>
+            
+            {% if following %}
+                {% for follow in following %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    {% if follow.following.profile.profile_picture %}
+                                        <img src="{{ follow.following.profile.profile_picture.url }}" alt="{{ follow.following.username }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                                    {% else %}
+                                        <div style="width: 60px; height: 60px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-7">
+                                    <h5 class="mb-0"><a href="{% url 'profile' follow.following.username %}" class="text-decoration-none">{{ follow.following.get_full_name|default:follow.following.username }}</a></h5>
+                                    <small class="text-muted">@{{ follow.following.username }}</small>
+                                    {% if follow.following.profile.bio %}
+                                        <p class="mb-0 mt-2">{{ follow.following.profile.bio|truncatewords:15 }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-3 text-end">
+                                    {% if request.user.is_authenticated and request.user != follow.following %}
+                                        {% if follow.is_followed_by_current_user %}
+                                            <a href="{% url 'unfollow_user' follow.following.username %}" class="btn btn-outline-primary btn-sm">Unfollow</a>
+                                        {% else %}
+                                            <a href="{% url 'follow_user' follow.following.username %}" class="btn btn-primary btn-sm">Follow</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">Not following anyone yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

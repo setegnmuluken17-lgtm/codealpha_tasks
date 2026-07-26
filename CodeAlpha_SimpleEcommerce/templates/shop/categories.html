@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'home' %}">Home</a> / Categories</nav>
+<h1 class="section-title">Shop Categories</h1>
+<div class="category-grid">
+  {% for category in categories %}
+    <a class="category-card image-card" href="{% url 'category_detail' category.slug %}" style="--bg:url('{{ category.image_url }}')">
+      <span class="cat-icon">{{ category.icon|default:"*" }}</span>
+      <h3>{{ category.name }}</h3>
+      <p>{{ category.products.count }} products</p>
+      <small>{{ category.description }}</small>
+      <strong>Explore Category</strong>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

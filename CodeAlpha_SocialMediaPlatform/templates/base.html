@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Social Media Platform{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #007bff !important;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid white;
+            object-fit: cover;
+        }
+        .cover-photo {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+        .btn-follow {
+            border-radius: 20px;
+            padding: 8px 24px;
+            font-weight: bold;
+        }
+        .alert {
+            margin-bottom: 20px;
+        }
+        body.dark-mode {
+            background-color: #121212;
+            color: #f1f3f5;
+        }
+        body.dark-mode .navbar,
+        body.dark-mode .card,
+        body.dark-mode .dropdown-menu {
+            background-color: #1f1f1f;
+            color: #f1f3f5;
+        }
+        body.dark-mode .navbar {
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.08);
+        }
+        body.dark-mode .nav-link,
+        body.dark-mode .dropdown-item,
+        body.dark-mode .card-title,
+        body.dark-mode .card-text,
+        body.dark-mode .text-dark {
+            color: #f1f3f5 !important;
+        }
+        body.dark-mode .text-muted {
+            color: #adb5bd !important;
+        }
+        body.dark-mode .bg-light,
+        body.dark-mode .alert-light {
+            background-color: #2b2b2b !important;
+            color: #f1f3f5;
+        }
+        body.dark-mode .form-control {
+            background-color: #2b2b2b;
+            border-color: #495057;
+            color: #f1f3f5;
+        }
+        body.dark-mode .form-control::placeholder {
+            color: #adb5bd;
+        }
+        .theme-toggle {
+            border: 1px solid #dee2e6;
+            background: transparent;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            line-height: 1;
+        }
+        body.dark-mode .theme-toggle {
+            border-color: #495057;
+            color: #f1f3f5;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">📱 SocialHub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'feed' %}">Feed</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'explore' %}">All Posts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'profile' user.username %}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'chat_inbox' %}">Messages</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'edit_profile' %}">Settings</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'explore' %}">All Posts</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item ms-lg-2">
+                        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+                            <span id="themeIcon">🌙</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="text-center mt-5 mb-5 text-muted">
+        <p>&copy; 2024 SocialHub. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const useDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+            const button = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+
+            function applyTheme(isDark) {
+                document.body.classList.toggle('dark-mode', isDark);
+                icon.textContent = isDark ? '☀️' : '🌙';
+                button.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                button.setAttribute('title', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            }
+
+            applyTheme(useDark);
+
+            button.addEventListener('click', function () {
+                const isDark = !document.body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                applyTheme(isDark);
+            });
+        })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

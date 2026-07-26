@@ -1,0 +1,26 @@
+<article class="product-card fade-in">
+  <div class="badges">
+    {% if product.discount_percent %}<span class="discount-badge">{{ product.discount_percent }}% OFF</span>{% endif %}
+    {% if product.is_featured %}<span class="new-badge">New</span>{% endif %}
+  </div>
+  <a href="{% url 'product_detail' product.id %}"><img src="{{ product.image_url }}" alt="{{ product.name }}" onerror="this.onerror=null;this.src='{{ product.category.image_url }}';"></a>
+  <div>
+    <p class="muted">{{ product.category.name|default:"General" }} | {{ product.brand }}</p>
+    <h3><a href="{% url 'product_detail' product.id %}">{{ product.name }}</a></h3>
+    <div class="rating">★★★★★ <span>{{ product.average_rating|floatformat:1 }}</span></div>
+    <div class="row">
+      <strong>{% if product.discount_percent %}<del>${{ product.price }}</del> ${{ product.final_price|floatformat:2 }}{% else %}${{ product.price }}{% endif %}</strong>
+      <span class="stock {% if product.stock == 0 %}out{% endif %}">{{ product.availability }}</span>
+    </div>
+    <div class="card-actions">
+      <a class="ghost-btn" href="{% url 'product_detail' product.id %}">Quick View</a>
+      {% if user.is_authenticated %}
+        <form action="{% url 'wishlist_toggle' product.id %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="ghost-btn">Save</button></form>
+      {% endif %}
+    </div>
+    <form action="{% url 'cart_add' product.id %}" method="post">
+      {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <button class="btn full" {% if product.stock == 0 %}disabled{% endif %}>Add to Cart</button>
+    </form>
+  </div>
+</article>

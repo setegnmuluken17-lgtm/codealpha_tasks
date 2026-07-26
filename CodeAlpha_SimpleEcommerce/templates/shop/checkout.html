@@ -1,0 +1,2 @@
+{% extends "base.html" %}
+{% block content %}<h1>Checkout</h1><section class="split"><form method="post" class="panel">{% csrf_token %}{{ form.as_p }}<button class="btn">Place Order</button></form><aside class="panel"><h2>Order Summary</h2>{% for item in items %}<p>{{ item.quantity }} x {{ item.product.name }} <strong>${{ item.subtotal }}</strong></p>{% endfor %}<hr><strong>Total: ${{ cart.total }}</strong><p>Payment: Cash on Delivery</p></aside></section>{% endblock %}

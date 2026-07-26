@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<nav class="breadcrumbs"><a href="{% url 'home' %}">Home</a> / <a href="{% url 'product_list' %}">Shop</a> / {{ product.name }}</nav>
+<section class="detail">
+  <div class="gallery">
+    <img class="zoom main-image" src="{{ product.image_url }}" alt="{{ product.name }}" data-main-image onerror="this.onerror=null;this.src='{{ product.category.image_url }}';">
+    <div class="thumbs">
+      <button type="button" data-thumb="{{ product.image_url }}"><img src="{{ product.image_url }}" alt="" onerror="this.onerror=null;this.src='{{ product.category.image_url }}';"></button>
+      {% if product.image_url_2 %}<button type="button" data-thumb="{{ product.image_url_2 }}"><img src="{{ product.image_url_2 }}" alt="" onerror="this.onerror=null;this.src='{{ product.category.image_url }}';"></button>{% endif %}
+      {% if product.image_url_3 %}<button type="button" data-thumb="{{ product.image_url_3 }}"><img src="{{ product.image_url_3 }}" alt="" onerror="this.onerror=null;this.src='{{ product.category.image_url }}';"></button>{% endif %}
+    </div>
+  </div>
+  <div>
+    <p class="muted">{{ product.category.name }} | {{ product.brand }}</p>
+    <h1>{{ product.name }}</h1>
+    {% if product.discount_percent %}<span class="discount-badge inline">{{ product.discount_percent }}% OFF</span>{% endif %}
+    <strong class="price">{% if product.discount_percent %}<del>${{ product.price }}</del> ${{ product.final_price|floatformat:2 }}{% else %}${{ product.price }}{% endif %}</strong>
+    <p class="rating">★★★★★ <span>{{ product.average_rating|floatformat:1 }}</span></p>
+    <p>{{ product.description }}</p>
+    <div class="spec-grid"><span>Brand</span><strong>{{ product.brand }}</strong><span>SKU</span><strong>{{ product.sku }}</strong><span>Stock</span><strong>{{ product.stock }}</strong><span>Status</span><strong class="stock {% if product.stock == 0 %}out{% endif %}">{{ product.availability }}</strong></div>
+    {% if product.specifications %}<div class="panel specs"><h2>Specifications</h2><p>{{ product.specifications|linebreaks }}</p></div>{% endif %}
+    <form action="{% url 'cart_add' product.id %}" method="post" class="qty">{% csrf_token %}<input type="hidden" name="next" value="{% url 'cart_detail' %}"><input type="number" name="quantity" min="1" max="{{ product.stock }}" value="1"><button class="btn">Add to Cart</button></form>
+    {% if user.is_authenticated %}<form action="{% url 'wishlist_toggle' product.id %}" method="post">{% csrf_token %}<button class="ghost-btn">{% if is_saved %}Saved in Wishlist{% else %}Save to Wishlist{% endif %}</button></form>{% endif %}
+  </div>
+</section>
+<section class="split">
+  <div class="panel"><h2>Product Reviews</h2>{% for review in reviews %}<article class="review"><strong>{{ review.user.username }} - {{ review.rating }} stars</strong><p>{{ review.comment }}</p>{% if review.user == user %}<a class="danger" href="{% url 'review_delete' review.id %}">Delete review</a>{% endif %}</article>{% empty %}<p>No reviews yet.</p>{% endfor %}</div>
+  <div class="panel"><h2>Write or Edit Review</h2>{% if user.is_authenticated %}<form method="post">{% csrf_token %}{{ review_form.as_p }}<button class="btn">Submit Review</button></form>{% else %}<p><a href="{% url 'login' %}">Login</a> to review this product.</p>{% endif %}</div>
+</section>
+<section><h2 class="section-title">Related Products</h2><div class="grid">{% for product in related %}{% include "shop/_product_card.html" %}{% empty %}<p>No related products yet.</p>{% endfor %}</div></section>
+{% if recently_viewed %}<section><h2 class="section-title">Recently Viewed</h2><div class="grid">{% for product in recently_viewed %}{% include "shop/_product_card.html" %}{% endfor %}</div></section>{% endif %}
+{% endblock %}

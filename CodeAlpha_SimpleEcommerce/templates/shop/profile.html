@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="section-title">User Dashboard</h1>
+<section class="dashboard-grid">
+  <article class="stat-card"><span>Profile</span><strong>{{ user.username }}</strong></article>
+  <article class="stat-card"><span>Orders</span><strong>{{ user.orders.count }}</strong></article>
+  <article class="stat-card"><span>Wishlist</span><strong>{{ wishlist.count }}</strong></article>
+  <article class="stat-card"><span>Reviews</span><strong>{{ user.product_reviews.count }}</strong></article>
+</section>
+<section class="split">
+  <div class="panel"><h2>Profile</h2><p>Name: {{ user.get_full_name|default:user.username }}</p><p>Email: {{ user.email }}</p><p>Phone: {{ profile.phone|default:"Not added" }}</p><p>Address: {{ profile.address|default:"Not added" }}</p><a class="btn" href="{% url 'edit_profile' %}">Settings</a><a class="btn secondary" href="{% url 'password_change' %}">Change Password</a></div>
+  <div class="panel"><h2>My Orders</h2>{% for order in orders %}<a class="order-line" href="{% url 'order_detail' order.id %}">#{{ order.id }} <span>{{ order.get_status_display }}</span><strong>${{ order.total }}</strong></a>{% empty %}<p>No orders yet.</p>{% endfor %}</div>
+</section>
+<section><h2 class="section-title">Wishlist</h2><div class="grid">{% for item in wishlist %}{% with product=item.product %}{% include "shop/_product_card.html" %}{% endwith %}{% empty %}<p>No saved products yet.</p>{% endfor %}</div></section>
+{% endblock %}

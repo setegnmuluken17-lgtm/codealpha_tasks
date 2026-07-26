@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Messages with {{ friend.username }} - SocialHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body border-bottom">
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{% url 'chat_inbox' %}" class="btn btn-light btn-sm">Back</a>
+                    {% if friend.profile.profile_picture %}
+                        <img src="{{ friend.profile.profile_picture.url }}" alt="{{ friend.username }}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #e9ecef; display: flex; align-items: center; justify-content: center;">User</div>
+                    {% endif %}
+                    <div>
+                        <h5 class="mb-0">{{ friend.get_full_name|default:friend.username }}</h5>
+                        <small class="text-muted">@{{ friend.username }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body" style="min-height: 360px;">
+                {% if thread_messages %}
+                    {% for message in thread_messages %}
+                        <div class="d-flex mb-3 {% if message.sender == request.user %}justify-content-end{% endif %}">
+                            <div class="{% if message.sender == request.user %}bg-primary text-white{% else %}bg-light{% endif %}" style="max-width: 75%; border-radius: 12px; padding: 10px 12px;">
+                                {% if message.text %}
+                                    <p class="mb-2">{{ message.text }}</p>
+                                {% endif %}
+                                {% if message.voice %}
+                                    <audio controls style="max-width: 100%;">
+                                        <source src="{{ message.voice.url }}">
+                                        Your browser does not support audio playback.
+                                    </audio>
+                                {% endif %}
+                                <small class="{% if message.sender == request.user %}text-white-50{% else %}text-muted{% endif %}">
+                                    {{ message.created_at|timesince }} ago
+                                </small>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info text-center">No messages yet. Say hello.</div>
+                {% endif %}
+            </div>
+
+            <div class="card-body border-top">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="mb-2">
+                        {{ form.text }}
+                        {% if form.text.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {% for error in form.text.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.voice.id_for_label }}" class="form-label">Voice message</label>
+                        {{ form.voice }}
+                        <div class="form-text">Upload MP3, WAV, WebM, OGG, or M4A audio. Max size: 15 MB.</div>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="startRecording">Record Voice</button>
+                            <button type="button" class="btn btn-outline-danger btn-sm" id="stopRecording" disabled>Stop</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="clearRecording" disabled>Clear</button>
+                        </div>
+                        <div class="form-text mt-2" id="recordingStatus">Recorder ready.</div>
+                        <audio controls id="recordingPreview" class="mt-2 w-100 d-none"></audio>
+                        {% if form.voice.errors %}
+                            <div class="alert alert-danger mt-2">
+                                {% for error in form.voice.errors %}{{ error }}{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        const startButton = document.getElementById('startRecording');
+        const stopButton = document.getElementById('stopRecording');
+        const clearButton = document.getElementById('clearRecording');
+        const statusText = document.getElementById('recordingStatus');
+        const preview = document.getElementById('recordingPreview');
+        const voiceInput = document.getElementById('{{ form.voice.id_for_label }}');
+
+        if (!startButton || !navigator.mediaDevices || !window.MediaRecorder) {
+            if (statusText) {
+                statusText.textContent = 'Voice recorder is not supported in this browser. You can still upload an audio file.';
+            }
+            if (startButton) {
+                startButton.disabled = true;
+            }
+            return;
+        }
+
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let stream = null;
+
+        function setRecordingState(isRecording) {
+            startButton.disabled = isRecording;
+            stopButton.disabled = !isRecording;
+        }
+
+        startButton.addEventListener('click', async function () {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                audioChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.addEventListener('dataavailable', function (event) {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                });
+
+                mediaRecorder.addEventListener('stop', function () {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioFile = new File([audioBlob], 'voice-message.webm', { type: 'audio/webm' });
+                    const dataTransfer = new DataTransfer();
+
+                    dataTransfer.items.add(audioFile);
+                    voiceInput.files = dataTransfer.files;
+
+                    preview.src = URL.createObjectURL(audioBlob);
+                    preview.classList.remove('d-none');
+                    clearButton.disabled = false;
+                    statusText.textContent = 'Recording attached. Send the message when ready.';
+
+                    if (stream) {
+                        stream.getTracks().forEach(function (track) {
+                            track.stop();
+                        });
+                    }
+                });
+
+                mediaRecorder.start();
+                setRecordingState(true);
+                clearButton.disabled = true;
+                statusText.textContent = 'Recording... click Stop when finished.';
+            } catch (error) {
+                statusText.textContent = 'Microphone permission was denied or unavailable.';
+            }
+        });
+
+        stopButton.addEventListener('click', function () {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                setRecordingState(false);
+            }
+        });
+
+        clearButton.addEventListener('click', function () {
+            voiceInput.value = '';
+            preview.removeAttribute('src');
+            preview.classList.add('d-none');
+            clearButton.disabled = true;
+            statusText.textContent = 'Recorder ready.';
+        });
+    })();
+</script>
+{% endblock %}

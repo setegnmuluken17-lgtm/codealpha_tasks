@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="register-shell">
+  <div class="register-intro">
+    <p class="eyebrow">Join CodeAlpha Shop</p>
+    <h1>Create your account</h1>
+    <p>Register to save wishlist items, write reviews, track orders, and checkout faster.</p>
+  </div>
+  <form method="post" class="panel auth register-form" novalidate data-register-form>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
+
+    <div class="form-grid two">
+      <div class="field-group">
+        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+        {{ form.first_name }}
+        {{ form.first_name.errors }}
+      </div>
+      <div class="field-group">
+        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+        {{ form.last_name }}
+        {{ form.last_name.errors }}
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="{{ form.username.id_for_label }}">Username</label>
+      {{ form.username }}
+      {{ form.username.errors }}
+    </div>
+
+    <div class="field-group">
+      <label for="{{ form.email.id_for_label }}">Email Address</label>
+      {{ form.email }}
+      <p class="live-error" data-email-error></p>
+      {{ form.email.errors }}
+    </div>
+
+    <div class="field-group">
+      <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+      {{ form.phone }}
+      {{ form.phone.errors }}
+    </div>
+
+    <div class="field-group password-field">
+      <label for="{{ form.password1.id_for_label }}">Password </label>
+      {{ form.password1 }}
+      <div class="password-rules" data-password-rules>
+        <p data-rule="length"><span>×</span> Length should be 8 to 64.</p>
+        <p data-rule="upper"><span>×</span> At least 1 Uppercase letter (A-Z).</p>
+        <p data-rule="lower"><span>×</span> At least 1 Lowercase letter (a-z).</p>
+        <p data-rule="number"><span>×</span> At least 1 Number digit (0-9).</p>
+        <p data-rule="special"><span>×</span> At least 1 Special character.</p>
+      </div>
+      {{ form.password1.errors }}
+    </div>
+
+    <div class="field-group">
+      <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+      {{ form.password2 }}
+      <p class="live-success" data-confirm-success></p>
+      {{ form.password2.errors }}
+    </div>
+
+    <button class="btn full" type="submit">Register</button>
+    <p class="auth-note">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+  </form>
+</section>
+{% endblock %}
